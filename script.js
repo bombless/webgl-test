@@ -38,3 +38,11 @@ gl.enableVertexAttribArray(pos);
 gl.vertexAttribPointer(pos, 1, gl.FLOAT, false, 0, 0);
 gl.drawArrays(gl.TRIANGLES, 0, 3);
 
++function step() {
+	var diff = +new Date/1000%(2*Math.PI);
+	vertices = [diff, 2 * Math.PI / 3 + diff, 2 * Math.PI / 3 * 2 + diff];
+	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+	gl.drawArrays(gl.TRIANGLES, 0, 3);
+	requestAnimationFrame(step);
+}()
+
