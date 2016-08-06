@@ -35,7 +35,6 @@
 	var fs = 'precision mediump float;varying float vPos;' + 'void main() { gl_FragColor = vec4(abs(mix(sin(vPos), cos(vPos), abs(sin(vPos)))), .8, abs(mix(cos(vPos), sin(vPos), abs(sin(vPos)))), 1); }';
 
 	var program = createProgram(vs, fs);
-	console.log(program);
 	gl.useProgram(program);
 
 	var pos = gl.getAttribLocation(program, 'pos');
