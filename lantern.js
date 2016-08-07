@@ -57,7 +57,7 @@
 
 	var vs = 'attribute vec3 pos;varying float vPos;' +
 	`void main() {
-		gl_Position = vec4(pos, 1);
+		gl_Position = vec4(pos.x, pos.y * .5, pos.z, 1);
 	}`;
 	var fs = 'precision mediump float;' +
 	`void main() {
