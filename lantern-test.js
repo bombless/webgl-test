@@ -34,14 +34,7 @@
 
 				put(lat*(i + 1), lng * j);
 
-				put(lat*(i + 1), lng*(j + 1));
-
-
-				put(lat * i, lng * j);
-
-                                put(lat*(i + 1), lng*(j + 1));
-
-				put(lat*(i + 1), lng*(j + 1));
+				put(lat*(i + 1), lng*(j+1));
 			}
 		}
 		return rs;
