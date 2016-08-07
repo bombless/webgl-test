@@ -108,13 +108,12 @@
 	gl.enableVertexAttribArray(color);
 	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 4*3+4*4, 0);
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 4*3+4*4, 4*3);
-	//gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
 
 	
 	+function step() {
+		requestAnimationFrame(step);
 		vertices = createLantern(.1, .1, 2*Math.PI+.02);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
-		requestAnimationFrame(step);
 	}()
 }()

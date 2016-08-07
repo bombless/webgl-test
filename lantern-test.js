@@ -69,14 +69,9 @@
 	var pos = gl.getAttribLocation(program, 'pos');
 	gl.enableVertexAttribArray(pos);
 	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 0, 0);
-	gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
 
-	return;
 	+function step() {
-		var diff = +new Date/1000%(2*Math.PI);
-		vertices = [diff, Math.PI / 2 + diff, Math.PI + diff, Math.PI + diff, 3 * Math.PI / 2 + diff, diff];
-		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-		gl.drawArrays(gl.TRIANGLES, 0, 6);
-		requestAnimationFrame(step);
+		//requestAnimationFrame(step);
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
 	}()
 }()
