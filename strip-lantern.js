@@ -14,14 +14,17 @@
 		gl.attachShader(program, vshader);
 		gl.attachShader(program, fshader);
 		gl.linkProgram(program);
+		program.use = function() {
+			gl.useProgram(program);
+			return program;
+		};
 		return program;
 	}
 
 	function createLantern(lat, lng, span) {
-		var alpha, beta, grammar;
 		var lat_count = Math.PI / lat;
 		var lng_count = span / lng;
-		var i, j, lat_val, lng_val;
+		var i, j;
 		var rs = [];
 		var seed = new Date/1000;
 		var colors = [[1, 0, 0, 1], [0, 1, 0, 1],
@@ -38,8 +41,8 @@
 			rs.push(Math.cos(lat));
 			rs.push(Math.sin(lat));
 		}
-		for (j = 0; j < lng_count - 1; ++j) {
-			for (i = 0; i < lat_count - 1; ++i) {
+		for (i = 0; i < lat_count - 1; ++i) {
+			for (j = 0; j < lng_count - 1; ++j) {
                                 put(lat * i, lng * j);
 
                                 put_color(lng * j + seed, lat*i);
@@ -70,21 +73,19 @@
 		return rs;
 	}
 
-	var div = document.createElement('div');
-	div.innerHTML = '<canvas width=300 height=300></canvas>';
-	document.addEventListener('DOMContentLoaded', function() {
-		document.body.appendChild(div);
-	});
-	var canvas = div.querySelector('canvas');
+	function createCanvas() {
+		var div = document.createElement('div');
+		div.innerHTML = '<canvas width=300 height=300></canvas>';
+		document.addEventListener('DOMContentLoaded', function() {
+			document.body.appendChild(div);
+		});
+		return div.querySelector('canvas');
+	}
+
+	var canvas = createCanvas();
 	var gl = canvas.getContext('webgl', {
 		'premultipliedAlpha': false
 	});
-
-	var buf = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-
-	var vertices = createLantern(.1, .1, 2*Math.PI+.02);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute vec3 pos;attribute vec4 color;varying vec4 color_;' +
 	`void main() {
@@ -95,25 +96,29 @@
 	`void main() {
 		gl_FragColor = color_;
 	}`;
-
-	var program = createProgram(vs, fs);
-	gl.useProgram(program);
-	gl.enable(gl.BLEND);
-	gl.enable(gl.CULL_FACE);
-	gl.cullFace(gl.BACK);
+	var program = createProgram(vs, fs).use();
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
+	var vertices_size = createLantern(.1, .1, 2*Math.PI+.02).length * 4;
+
+	gl.enable(gl.BLEND);
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.BACK);
+	
 	gl.enableVertexAttribArray(pos);
 	gl.enableVertexAttribArray(color);
+	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
 	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 4*3+4*4, 0);
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 4*3+4*4, 4*3);
 
+	gl.bufferData(gl.ARRAY_BUFFER, vertices_size, gl.DYNAMIC_DRAW);
 	
 	+function step() {
+		var vertices = createLantern(.1, .1, 2*Math.PI+.02);
 		requestAnimationFrame(step);
-		vertices = createLantern(.1, .1, 2*Math.PI+.02);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
 	}()
 }()
+
