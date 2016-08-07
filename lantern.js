@@ -23,19 +23,18 @@
 		var lng_count = span / lng;
 		var i, j, lat_val, lng_val;
 		var rs = [];
+		function put(lat, lng) {
+			rs.push(Math.sin(lng)*Math.sin(lat));
+			rs.push(Math.cos(lat));
+			rs.push(Math.sin(lat));
+		}
 		for (i = 0; i < lat_count - 1; ++i) {
 			for (j = 0; j < lng_count - 1; ++j) {
-				rs.push(Math.sin(lng*j)*Math.sin(lat*i));
-				rs.push(Math.cos(lat*i));
-				rs.push(Math.sin(lat*i));
+				put(lat * i, lng * j);
 
-				rs.push(Math.sin(lng*j)*Math.sin(lat*(i+1)));
-                                rs.push(Math.cos(lat*(i+1)));
-                                rs.push(Math.sin(lat*(i+1)));
+				put(lat*(i + 1), lng * j);
 
-				rs.push(Math.sin(lng*(j+1))*Math.sin(lat*(i+1)));
-				rs.push(Math.cos(lat*(i+1)));
-				rs.push(Math.sin(lat*(i+1)));
+				put(lat*(i + 1), lng*(j+1));
 			}
 		}
 		return rs;
