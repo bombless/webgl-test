@@ -30,17 +30,32 @@
 		}
 		for (i = 0; i < lat_count - 1; ++i) {
 			for (j = 0; j < lng_count - 1; ++j) {
+
+                                put(lat * i, lng * j);
+
+                                rs.push(1, 0, 0, 1);
+
+                                put(lat*(i + 1), lng*j);
+
+                                rs.push(0, 1, 0, 1);
+
+                                put(lat*(i + 1), lng*(j + 1));
+
+                                rs.push(0, 0, 1, 1);
+				
+
+
 				put(lat * i, lng * j);
 
 				rs.push(1, 0, 0, 1);
 				
-				put(lat*(i + 1), lng * j);
-
-				rs.push(0, 1, 0, 1);
-
 				put(lat*(i + 1), lng*(j + 1));
 
 				rs.push(0, 0, 1, 1);
+
+				put(lat*(i), lng*(j + 1));
+
+                                rs.push(0, 1, 0, 1);
 			}
 		}
 		return rs;
@@ -52,7 +67,9 @@
 		document.body.appendChild(div);
 	});
 	var canvas = div.querySelector('canvas');
-	var gl = canvas.getContext('webgl');
+	var gl = canvas.getContext('webgl', {
+		'premultipliedAlpha': false
+	});
 
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -72,6 +89,7 @@
 
 	var program = createProgram(vs, fs);
 	gl.useProgram(program);
+	gl.enable(gl.BLEND);
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
