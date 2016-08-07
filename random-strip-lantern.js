@@ -23,10 +23,14 @@
 		var lng_count = span / lng;
 		var i, j, lat_val, lng_val;
 		var rs = [];
+		var seed_pool = {};
 		var colors = [[1, 0, 0, 1], [0, 1, 0, 1],
 				[0, 0, 1, 1]];
 		function put_color(seed) {
-			var factor = seed % 1;
+			if (!seed_pool[seed]) {
+				seed_pool[seed] = Math.random();
+			}
+			var factor = seed_pool[seed] % 1;
 			var idx = Math.floor(factor / .34);
 			[].push.apply(rs, colors[idx]);
 		}
@@ -35,9 +39,8 @@
 			rs.push(Math.cos(lat));
 			rs.push(Math.sin(lat));
 		}
-		for (i = 0; i < lat_count - 1; ++i) {
-			for (j = 0; j < lng_count - 1; ++j) {
-
+		for (j = 0; j < lng_count - 1; ++j) {
+			for (i = 0; i < lat_count - 1; ++i) {
                                 put(lat * i, lng * j);
 
                                 put_color(lng * j);
@@ -81,7 +84,7 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	var vertices = createLantern(.1, .1, 2*Math.PI+.1);
+	var vertices = createLantern(.1, .1, 2*Math.PI+.02);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute vec3 pos;attribute vec4 color;varying vec4 color_;' +
