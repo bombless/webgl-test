@@ -74,7 +74,7 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	var vertices = createLantern(.1, .1, 1);
+	var vertices = createLantern(.1, .1, 2*Math.PI+.1);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute vec3 pos;attribute vec4 color;varying vec4 color_;' +
@@ -90,6 +90,8 @@
 	var program = createProgram(vs, fs);
 	gl.useProgram(program);
 	gl.enable(gl.BLEND);
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.BACK);
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
