@@ -30,10 +30,10 @@
 		var colors = [[1, 0, 0, 1], [0, 1, 0, 1],
 				[0, 0, 1, 1]];
 		function put_color(seed, lat) {
-			var factor = 1 - seed % 1;
-			var idx = Math.floor(factor / .34);
+			var factor = seed / Math.PI * 2 % 1;
+			var idx = Math.floor(factor * 3);
 			var color = colors[idx];
-			color[3] = Math.sin(lat);
+			color[3] = Math.sqrt(Math.sqrt(Math.sin(lat)));
 			[].push.apply(rs, color);
 		}
 		function put(lat, lng) {
@@ -41,8 +41,8 @@
 			rs.push(Math.cos(lat));
 			rs.push(Math.sin(lat));
 		}
-		for (i = 0; i < lat_count - 1; ++i) {
-			for (j = 0; j < lng_count - 1; ++j) {
+		for (i = 0; i < lat_count; ++i) {
+			for (j = 0; j < lng_count; ++j) {
                                 put(lat * i, lng * j);
 
                                 put_color(lng * j + seed, lat*i);
@@ -100,7 +100,7 @@
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
-	var vertices_size = createLantern(.1, .1, 2*Math.PI+.02).length * 4;
+	var vertices_size = createLantern(.1, .1, 2*Math.PI).length * 4;
 
 	gl.enable(gl.BLEND);
 	gl.enable(gl.CULL_FACE);
@@ -115,7 +115,7 @@
 	gl.bufferData(gl.ARRAY_BUFFER, vertices_size, gl.DYNAMIC_DRAW);
 	
 	+function step() {
-		var vertices = createLantern(.1, .1, 2*Math.PI+.02);
+		var vertices = createLantern(.1, .1, 2*Math.PI);
 		requestAnimationFrame(step);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
