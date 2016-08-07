@@ -32,16 +32,15 @@
 			for (j = 0; j < lng_count - 1; ++j) {
 				put(lat * i, lng * j);
 
+				rs.push(1, 0, 0);
+				
 				put(lat*(i + 1), lng * j);
 
-				put(lat*(i + 1), lng*(j + 1));
-
-
-				put(lat * i, lng * j);
-
-                                put(lat*(i + 1), lng*(j + 1));
+				rs.push(0, 1, 0);
 
 				put(lat*(i + 1), lng*(j + 1));
+
+				rs.push(0, 0, 1);
 			}
 		}
 		return rs;
@@ -61,22 +60,26 @@
 	var vertices = createLantern(.1, .1, 1);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 pos;varying float vPos;' +
+	var vs = 'attribute vec3 pos;attribute vec3 color;varying vec3 color_;' +
 	`void main() {
 		gl_Position = vec4(pos.x, pos.y * .5, pos.z, 1);
+		color_ = color;
 	}`;
-	var fs = 'precision mediump float;' +
+	var fs = 'precision mediump float;varying vec3 color_;' +
 	`void main() {
-		gl_FragColor = vec4(1, 0, 0, 1);
+		gl_FragColor = vec4(color_, 1);
 	}`;
 
 	var program = createProgram(vs, fs);
 	gl.useProgram(program);
 
 	var pos = gl.getAttribLocation(program, 'pos');
+	var color = gl.getAttribLocation(program, 'color');
 	gl.enableVertexAttribArray(pos);
-	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 0, 0);
-	gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
+	gl.enableVertexAttribArray(color);
+	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 4*3+4*3, 0);
+	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 4*3+4*3, 4*3);
+	gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 6);
 
 	return;
 	+function step() {
