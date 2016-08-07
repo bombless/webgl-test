@@ -20,13 +20,11 @@
 	var getVertexList = (function() {
 		var vertices_tpl = [0, Math.PI / 2, Math.PI, Math.PI, 3 * Math.PI / 2, 0];
 		var NUM = 4;
-		var first_time = true;
 		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]];
 		return function() {
 			var i, j;
 			var output = [];
 			var diff = [];
-			var gray;
 			var time = new Date/1000;
 			for (i = 0; i < NUM; ++i) {
 				diff.push((time + 2*Math.PI/NUM*i)%(2*Math.PI));
@@ -35,15 +33,9 @@
 				for (j = 0; j < vertices_tpl.length; ++j) {
 					output.push(vertices_tpl[j] + Math.PI / 4);
 					output.push(diff[i]);
-					gray = 1/NUM*i*.7+.2;
-					output.push(gray);
-					[].push(output, colors[i]);
-					if (first_time) {
-						console.log(gray, colors[i]);
-					}
+					[].push.apply(output, colors[i]);
 				}
 			}
-			first_time = false;
 			return output;
 		};
 	})();
@@ -60,46 +52,44 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 	
+	console.log(list)
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(list), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute float pos;attribute float angle;attribute float gray;attribute vec3 color;varying float factor;varying vec3 color_;' +
+	var vs = 'attribute float pos;attribute float angle;attribute vec3 color;varying vec3 color_;' +
 	`void main() {
 		float x = sin(pos);
 		float y = cos(pos);
-		float z = 1.0;
-		vec3 pos_ = vec3(x, y, z);
+		float z = 1. / sqrt(2.);
 		float new_x = x * cos(angle) - z * sin(angle);
 		float new_y = y;
 		float new_z = x * sin(angle) + z * cos(angle);
-		gl_Position = vec4(new_x, new_y, new_z, 1.0);
-		factor = gray;
+		gl_Position = vec4(new_x * .7, new_y * .7, new_z * .7, 1.);
 		color_ = color;
 	}`;
-	var fs = 'precision mediump float;varying float factor;varying vec3 color_;' + 'void main() { gl_FragColor = vec4(color_, 1.0); }';
+	var fs = 'precision mediump float;varying vec3 color_;' + 'void main() { gl_FragColor = vec4(color_, 1.0); }';
 
 	var program = createProgram(vs, fs);
 	gl.useProgram(program);
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var angle = gl.getAttribLocation(program, 'angle');
-	var gray = gl.getAttribLocation(program, 'gray');
 	var color = gl.getAttribLocation(program, 'color');
 
 	gl.enableVertexAttribArray(pos);
-	gl.vertexAttribPointer(pos, 1, gl.FLOAT, false, 4 + 4 + 4 + 12, 0);
+	gl.vertexAttribPointer(pos, 1, gl.FLOAT, false, 4 + 4 + 12, 0);
 	gl.enableVertexAttribArray(angle);
-	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 4 + 4 + 4 + 12, 4);
-	gl.enableVertexAttribArray(gray);
-	gl.vertexAttribPointer(gray, 1, gl.FLOAT, false, 4 + 4 + 4 + 12, 8);
+	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 4 + 4 + 12, 4);
 	gl.enableVertexAttribArray(color);
-	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 4 + 4 + 4 + 12, 12);
+	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 4 + 4 + 12, 8);
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LESS);
+	gl.enable(gl.CULL_FACE);
+	gl.cullFace(gl.FRONT);
 	
 	+function step() {
 		var list = getVertexList();
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(list), gl.DYNAMIC_DRAW);
-		gl.drawArrays(gl.TRIANGLES, 0, list.length / 6);
+		gl.drawArrays(gl.TRIANGLES, 0, list.length / 5);
 		requestAnimationFrame(step);
 	}()
 }()
