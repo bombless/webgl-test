@@ -26,7 +26,6 @@
 		function put(lat, lng) {
 			rs.push(Math.sin(lng)*Math.sin(lat));
 			rs.push(Math.cos(lat));
-			rs.push(Math.sin(lat));
 		}
 		for (i = 0; i < lat_count - 1; ++i) {
 			for (j = 0; j < lng_count - 1; ++j) {
@@ -54,9 +53,9 @@
 	var vertices = createLantern(.1, .1, 1);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 pos;varying float vPos;' +
+	var vs = 'attribute vec2 pos;' +
 	`void main() {
-		gl_Position = vec4(pos.x, pos.y * .5, pos.z, 1);
+		gl_Position = vec4(pos.x, pos.y * .5, 0, 1);
 	}`;
 	var fs = 'precision mediump float;' +
 	`void main() {
@@ -68,10 +67,10 @@
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	gl.enableVertexAttribArray(pos);
-	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
 
 	+function step() {
 		//requestAnimationFrame(step);
-		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 	}()
 }()
