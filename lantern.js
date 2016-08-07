@@ -33,29 +33,29 @@
 
                                 put(lat * i, lng * j);
 
-                                rs.push(1, 0, 0, 1);
+                                rs.push(1, 0, 0, Math.sin(lat*i));
 
                                 put(lat*(i + 1), lng*j);
 
-                                rs.push(0, 1, 0, 1);
+                                rs.push(1, 1, 0, .4);
 
                                 put(lat*(i + 1), lng*(j + 1));
 
-                                rs.push(0, 0, 1, 1);
+                                rs.push(1, 0, 1, .4);
 				
 
 
 				put(lat * i, lng * j);
 
-				rs.push(1, 0, 0, 1);
-				
+				rs.push(1, 0, 0, Math.sin(lat*i));
+			
 				put(lat*(i + 1), lng*(j + 1));
 
-				rs.push(0, 0, 1, 1);
+				rs.push(1, 0, 1, .4);
 
 				put(lat*(i), lng*(j + 1));
 
-                                rs.push(0, 1, 0, 1);
+                                rs.push(1, 1, 0, .4);
 			}
 		}
 		return rs;
