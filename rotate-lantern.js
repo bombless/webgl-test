@@ -37,7 +37,7 @@
 		function put(lat, lng) {
 			rs.push(Math.sin(lng)*Math.sin(lat));
 			rs.push(Math.cos(lat));
-			rs.push(Math.sin(lat));
+			rs.push(Math.sin(lat)*Math.cos(lng));
 		}
 		for (i = 0; i < lat_count; ++i) {
 			for (j = 0; j < lng_count; ++j) {
@@ -85,9 +85,16 @@
 		'premultipliedAlpha': false
 	});
 
-	var vs = 'attribute vec3 pos;attribute vec4 color;varying vec4 color_;' +
+	var vs = 'attribute vec3 pos;attribute vec4 color;uniform float angle;varying vec4 color_;' +
 	`void main() {
-		gl_Position = vec4(pos.x, pos.y * .5, pos.z, 1);
+		float x = pos.x;
+		float y = pos.y;
+		float z = pos.z;
+		float new_x = x * cos(angle) - z * sin(angle);
+		float new_y = y * .6;
+		float new_z = x * sin(angle) + z * cos(angle);
+
+		gl_Position = vec4(new_x, new_y, new_z, 1);
 		color_ = color;
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' +
@@ -98,7 +105,8 @@
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
-	var vertices = createLantern(.1, .1, 2*Math.PI);
+	var angle = gl.getUniformLocation(program, 'angle');
+	var vertices = createLantern(.1, .1, 2* Math.PI);
 
 	gl.enable(gl.BLEND);
 	gl.enable(gl.CULL_FACE);
@@ -114,6 +122,7 @@
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	
 	+function step() {
+		gl.uniform1f(angle, new Date/1000%(2*Math.PI));
 		requestAnimationFrame(step);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
 	}()
