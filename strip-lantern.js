@@ -27,14 +27,13 @@
 		var i, j;
 		var rs = [];
 		var seed = new Date/1000;
-		var colors = [[1, 0, 0, 1], [0, 1, 0, 1],
-				[0, 0, 1, 1]];
-		function put_color(seed, lat) {
-			var factor = seed / Math.PI * 2 % 1;
+		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+		function put_color(lng, lat) {
+			var factor = (lng + seed) / Math.PI * 2 % 1;
 			var idx = Math.floor(factor * 3);
 			var color = colors[idx];
-			color[3] = Math.sqrt(Math.sqrt(Math.sin(lat)));
 			[].push.apply(rs, color);
+			rs.push(Math.sqrt(Math.sqrt(Math.sin(lat))));
 		}
 		function put(lat, lng) {
 			rs.push(Math.sin(lng)*Math.sin(lat));
@@ -45,29 +44,29 @@
 			for (j = 0; j < lng_count; ++j) {
                                 put(lat * i, lng * j);
 
-                                put_color(lng * j + seed, lat*i);
+                                put_color(lng * j, lat * i);
 
-                                put(lat*(i + 1), lng*j);
+                                put(lat*(i + 1), lng * j);
 
-                                put_color(lng * j + seed, lat*i);
+                                put_color(lng * j, lat * i);
 
                                 put(lat*(i + 1), lng*(j + 1));
 
-                                put_color(lng * j + seed, lat*i);
+                                put_color(lng * j, lat * i);
 				
 
 
 				put(lat * i, lng * j);
 
-				put_color(lng * j + seed, lat*i);
+				put_color(lng * j, lat * i);
 			
 				put(lat*(i + 1), lng*(j + 1));
 
-				put_color(lng * j + seed, lat*i);
+				put_color(lng * j, lat * i);
 
-				put(lat*(i), lng*(j + 1));
+				put(lat * i, lng*(j + 1));
 
-                                put_color(lng * j + seed, lat*i);
+                                put_color(lng * j, lat*i);
 			}
 		}
 		return rs;
