@@ -22,7 +22,6 @@
 		var NUM = 4;
 		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]];
 		return function() {
-			var time = new Date/1000;
 			var output = [];
 			[].push.apply(output, genBottom());
 			[].push.apply(output, genTop());
@@ -34,16 +33,11 @@
 				var output = [];
 				var diff = [];
 				for (i = 0; i < NUM; ++i) {
-					diff.push((time + 2*Math.PI/NUM*i)%(2*Math.PI));
+					diff.push((2*Math.PI/NUM*i)%(2*Math.PI));
 				}
 				for (i = 0; i < NUM; ++i) {
 					for (j = 0; j < vertices_tpl.length; ++j) {
-						if (i) {
-							[].push.apply(output, genCoverTile(vertices_tpl[vertices_tpl.length - j - 1] + Math.PI / 4, diff[i]));
-						} else {
-							[].push.apply(output, genCoverTile(vertices_tpl[j] + Math.PI / 4, diff[i]));
-						}
-						
+						[].push.apply(output, genCoverTile(vertices_tpl[vertices_tpl.length - j - 1] + Math.PI / 4, diff[i]));
 						[].push.apply(output, colors[i]);
 						output.push(1);
 					}
@@ -54,9 +48,8 @@
 			function genTop() {
 				var i;
 				var output = [];
-				var diff = time % (2*Math.PI);
 				for (i = 0; i < vertices_tpl.length; ++i) {
-					[].push.apply(output, genTopTile(vertices_tpl[i] + Math.PI / 4, diff));
+					[].push.apply(output, genTopTile(vertices_tpl[i] + Math.PI / 4));
 					output.push(0, 0, 0, 1);
 				}
 				return output;
@@ -65,9 +58,8 @@
 			function genBottom() {
 				var i;
 				var output = [];
-				var diff = time % (2*Math.PI);
 				for (i = vertices_tpl.length - 1; i >= 0; --i) {
-					[].push.apply(output, genBottomTile(vertices_tpl[i] + Math.PI / 4, diff));
+					[].push.apply(output, genBottomTile(vertices_tpl[i] + Math.PI / 4));
 					output.push(1, 1, 0, 1);
 				}
 				return output;
@@ -85,28 +77,20 @@
 				return [new_x * .7, new_y * .7, new_z * .7];
 			}
 
-			function genTopTile(theta, angle) {
+			function genTopTile(theta) {
 				var x = Math.sin(theta);
 				var z = Math.cos(theta);
 				var y = 1 / Math.sqrt(2);
 
-				var new_x = x * Math.cos(angle) - z * Math.sin(angle);
-				var new_y = y;
-				var new_z = x * Math.sin(angle) + z * Math.cos(angle);
-
-				return [new_x * .7, new_y * .7, new_z * .7];
+				return [x * .7, y * .7, z * .7];
 			}
 
-			function genBottomTile(theta, angle) {
+			function genBottomTile(theta) {
 				var x = Math.sin(theta);
 				var z = Math.cos(theta);
 				var y = -1 / Math.sqrt(2);
 
-				var new_x = x * Math.cos(angle) - z * Math.sin(angle);
-				var new_y = y;
-				var new_z = x * Math.sin(angle) + z * Math.cos(angle);
-
-				return [new_x * .7, new_y * .7, new_z * .7];
+				return [x * .7, y * .7, z * .7];
 			}
 		};
 
@@ -156,7 +140,7 @@
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
-	gl.cullFace(gl.FRONT);
+	gl.cullFace(gl.BACK);
 	
 	+function step() {
 		var list = getVertexList();
