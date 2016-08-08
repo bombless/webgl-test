@@ -38,7 +38,12 @@
 				}
 				for (i = 0; i < NUM; ++i) {
 					for (j = 0; j < vertices_tpl.length; ++j) {
-						[].push.apply(output, genCoverTile(vertices_tpl[j] + Math.PI / 4, diff[i]));
+						if (i) {
+							[].push.apply(output, genCoverTile(vertices_tpl[vertices_tpl.length - j - 1] + Math.PI / 4, diff[i]));
+						} else {
+							[].push.apply(output, genCoverTile(vertices_tpl[j] + Math.PI / 4, diff[i]));
+						}
+						
 						[].push.apply(output, colors[i]);
 						output.push(1);
 					}
@@ -52,18 +57,18 @@
 				var diff = time % (2*Math.PI);
 				for (i = 0; i < vertices_tpl.length; ++i) {
 					[].push.apply(output, genTopTile(vertices_tpl[i] + Math.PI / 4, diff));
-					output.push(0, 0, 0 ,1);
+					output.push(0, 0, 0, 1);
 				}
 				return output;
 			}
 
 			function genBottom() {
-				var i, j;
+				var i;
 				var output = [];
 				var diff = time % (2*Math.PI);
-				for (j = 0; j < vertices_tpl.length; ++j) {
-					[].push.apply(output, genBottomTile(vertices_tpl[j] + Math.PI / 4, diff));
-					output.push(0, 0, 0 ,1);
+				for (i = vertices_tpl.length - 1; i >= 0; --i) {
+					[].push.apply(output, genBottomTile(vertices_tpl[i] + Math.PI / 4, diff));
+					output.push(1, 1, 0, 1);
 				}
 				return output;
 			}
@@ -118,13 +123,21 @@
 
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-	
-	console.log(list)
+
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(list), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 data;attribute vec4 color;varying vec4 color_;' +
+	var vs = 'attribute vec3 data;attribute vec4 color;uniform float rotate;varying vec4 color_;' +
 	`void main() {
-		gl_Position = vec4(data, 1.);
+		float angle = rotate;
+
+		float x = data.x;
+		float y = data.y;
+		float z = data.z;
+
+		float new_y = y * cos(angle) - z * sin(angle);
+		float new_x = x;
+		float new_z = y * sin(angle) + z * cos(angle);
+		gl_Position = vec4(new_x, new_y, new_z, 1.);
 		color_ = color;
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' + 'void main() { gl_FragColor = color_; }';
@@ -134,6 +147,7 @@
 
 	var data = gl.getAttribLocation(program, 'data');
 	var color = gl.getAttribLocation(program, 'color');
+	var rotate = gl.getUniformLocation(program, 'rotate');
 
 	gl.enableVertexAttribArray(data);
 	gl.vertexAttribPointer(data, 3, gl.FLOAT, false, 4 * (3 + 4), 0);
@@ -147,6 +161,7 @@
 	+function step() {
 		var list = getVertexList();
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(list), gl.DYNAMIC_DRAW);
+		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
 		gl.drawArrays(gl.TRIANGLES, 0, list.length / 7);
 		requestAnimationFrame(step);
 	}()
