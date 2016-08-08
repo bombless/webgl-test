@@ -97,7 +97,8 @@
 	})();
 
 	var div = document.createElement('div');
-	var list = getVertexList();
+	var cube_vertices = getVertexList();
+	var vertices_count = cube_vertices.length / 7;
 	div.innerHTML = '<canvas width=300 height=300></canvas>';
 	document.addEventListener('DOMContentLoaded', function() {
 		document.body.appendChild(div);
@@ -108,7 +109,8 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(list), gl.DYNAMIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + 4 * vertices_count, gl.DYNAMIC_DRAW);
+	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(cube_vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute vec3 data;attribute vec4 color;uniform float rotate;varying vec4 color_;' +
 	`void main() {
@@ -143,10 +145,8 @@
 	gl.cullFace(gl.BACK);
 	
 	+function step() {
-		var list = getVertexList();
-		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(list), gl.DYNAMIC_DRAW);
 		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
-		gl.drawArrays(gl.TRIANGLES, 0, list.length / 7);
+		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
 		requestAnimationFrame(step);
 	}()
 }()
