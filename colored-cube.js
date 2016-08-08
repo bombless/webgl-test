@@ -33,7 +33,7 @@
 				var output = [];
 				var diff = [];
 				for (i = 0; i < NUM; ++i) {
-					diff.push((2*Math.PI/NUM*i)%(2*Math.PI));
+					diff.push(2*Math.PI/NUM*i);
 				}
 				for (i = 0; i < NUM; ++i) {
 					for (j = 0; j < vertices_tpl.length; ++j) {
