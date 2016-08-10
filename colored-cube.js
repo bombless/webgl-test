@@ -99,6 +99,8 @@
 	var getTranslation = (function() {
 		var translation = [0, 0];
 		var A = 65, D = 68, W = 87, S = 83;
+
+		// TODO: add easing here
 		
 		addEventListener('keyup', function() {
 			if (event.keyCode == A) {

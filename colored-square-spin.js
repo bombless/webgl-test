@@ -52,7 +52,6 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 	
-	console.log(list)
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(list), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute float pos;attribute float angle;attribute vec3 color;varying vec3 color_;' +
