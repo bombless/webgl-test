@@ -96,6 +96,42 @@
 
 	})();
 
+	var getTranslation = (function() {
+		var translation = [0, 0];
+		var A = 65, D = 68, W = 87, S = 83;
+		
+		addEventListener('keyup', function() {
+			if (event.keyCode == A) {
+				translation[0]  -= .1;
+			} else if (event.keyCode == D) {
+				translation[0]  += .1;
+			} else if (event.keyCode == S) {
+				translation[1]  -= .1;
+			} else if (event.keyCode == W) {
+				translation[1]  += .1;
+			}
+		});
+		return function () {
+			return translation;
+		};
+	})();
+
+	var getScale = (function() {
+		var scale = 1;
+		var MINUS = 109, PLUS = 107;
+		
+		addEventListener('keyup', function() {
+			if (event.keyCode == PLUS) {
+				scale /= .99;
+			} else if (event.keyCode == MINUS) {
+				scale *= .99;
+			}
+		});
+		return function () {
+			return scale;
+		};
+	})();
+
 	var div = document.createElement('div');
 	var cube_vertices = getVertexList();
 	var vertices_count = cube_vertices.length / 7;
@@ -109,14 +145,14 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + 4 * vertices_count, gl.DYNAMIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + 16 * vertices_count, gl.DYNAMIC_DRAW);
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(cube_vertices), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 data;attribute vec4 color;attribute float angle;uniform float rotate;varying vec4 color_;' +
+	var vs = 'attribute vec3 data;attribute vec4 color;attribute float angle;attribute float scale;attribute vec2 translation;uniform float rotate;varying vec4 color_;' +
 	`void main() {
-		float x = data.x;
-		float y = data.y;
-		float z = data.z;
+		float x = data.x * scale;
+		float y = data.y * scale;
+		float z = data.z * scale;
 
 		float new_y = y * cos(angle) - z * sin(angle);
 		float new_x = x;
@@ -125,7 +161,7 @@
 		new_x = new_x * cos(rotate) - new_z * sin(rotate);
 		new_z = new_x * sin(rotate) + new_z * cos(rotate);
 
-		gl_Position = vec4(new_x, new_y, new_z, 1.);
+		gl_Position = vec4(new_x + translation.x, new_y + translation.y, new_z, 1.);
 		color_ = color;
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' + 'void main() { gl_FragColor = color_; }';
@@ -136,6 +172,8 @@
 	var data = gl.getAttribLocation(program, 'data');
 	var color = gl.getAttribLocation(program, 'color');
 	var angle = gl.getAttribLocation(program, 'angle');
+	var scale = gl.getAttribLocation(program, 'scale');
+	var translation = gl.getAttribLocation(program, 'translation');
 	var rotate = gl.getUniformLocation(program, 'rotate');
 
 	gl.enableVertexAttribArray(data);
@@ -144,18 +182,26 @@
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 4 * (3 + 4), 12);
 	gl.enableVertexAttribArray(angle);
 	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 0, cube_vertices.length * 4);
+	gl.enableVertexAttribArray(scale);
+	gl.vertexAttribPointer(scale, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 4);
+	gl.enableVertexAttribArray(translation);
+	gl.vertexAttribPointer(translation, 2, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 8);
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
 	gl.cullFace(gl.BACK);
 	
 	+function step() {
-		var angle = new Date/1200%(2*Math.PI);
-		var i, angle_list = [];
+		var angle = new Date/1200%(2*Math.PI), scale = getScale(), translation = getTranslation();
+		var i, angle_list = [], scale_list = [], translation_list = [];
 		for (i = 0; i < vertices_count; ++i) {
 			angle_list.push(angle);
+			scale_list.push(scale);
+			[].push.apply(translation_list, translation);
 		}
 		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4, new Float32Array(angle_list), gl.DYNAMIC_DRAW);
+		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4, new Float32Array(scale_list), gl.DYNAMIC_DRAW);
+		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4 + scale_list.length * 4, new Float32Array(translation_list), gl.DYNAMIC_DRAW);
 		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
 		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
 		requestAnimationFrame(step);
