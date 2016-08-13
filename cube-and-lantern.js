@@ -98,6 +98,68 @@
 
 	var selection = 0;
 
+	var getLanternTranslation = (function() {
+		var translation = [-.6, 0];
+		var A = 65, D = 68, W = 87, S = 83;
+		var last_time, c, b;
+		setTimeout(function step() {
+			var now = Date.now();
+			var diff = now - last_time;
+
+			if (diff < 600) {
+				translation[0] = easing.easeOutQuad(
+					0, diff, b[0], c[0], 600);
+				translation[1] = easing.easeOutQuad(
+          0, diff, b[1], c[1], 600);
+			}
+			setTimeout(step, 50);
+		
+		}, 100);
+		
+		addEventListener('keyup', function() {
+			var x = translation[0];
+			var y = translation[1];
+			if (selection != 1) return;
+			if (event.keyCode == A) {
+				last_time = Date.now();
+				b = [x, y];
+				c = [-.1, 0];
+			} else if (event.keyCode == D) {
+				last_time = Date.now();
+				b = [x, y];
+				c = [.1, 0];
+			} else if (event.keyCode == S) {
+				last_time = Date.now();
+				b = [x, y];
+				c = [0, -.1];
+			} else if (event.keyCode == W) {
+				last_time = Date.now();
+				b = [x, y];
+				c = [0, .1];
+			}
+		});
+		return function () {
+			return translation;
+		};
+	})();
+
+	var getLanternScale = (function() {
+		var scale = 1;
+		var MINUS = 109, PLUS = 107;
+		
+		addEventListener('keyup', function() {
+			if (selection != 1) return;
+			if (event.keyCode == PLUS) {
+				scale /= .99;
+			} else if (event.keyCode == MINUS) {
+				scale *= .99;
+			}
+		});
+		return function () {
+			return scale;
+		};
+	})();
+
 	var getCubeTranslation = (function() {
 		var translation = [-.6, 0];
 		var A = 65, D = 68, W = 87, S = 83;
