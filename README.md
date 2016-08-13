@@ -2,7 +2,7 @@
 Hosted on <http://rustykate.club/canvas.html>
 ## TODO
 * Color picking
-* Projection
+* ~~Projection~~
 
 ## Screenshot
 ![screenshot](screenshot.png)
