@@ -281,12 +281,13 @@
 	var lantern_vertices_count = lantern_vertices.length / 7;
 	var vertices_count = cube_vertices_count + lantern_vertices_count;
 	div.innerHTML = '<canvas width=300 height=300></canvas>' +
-		'<div></div>';
+		'<div></div><p></p>';
 	document.addEventListener('DOMContentLoaded', function() {
 		document.body.appendChild(div);
 	});
 	var canvas = div.querySelector('canvas');
 	var panel = div.querySelector('div');
+	var framerate = div.querySelector('p');
 	canvas.addEventListener('click', function(ev) {
 		ev.preventDefault();
 		selection = 1;
@@ -350,10 +351,15 @@
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
 	gl.cullFace(gl.BACK);
+
+	var last_frame = new Date/1000;
 	
 	+function step() {
+		var now = new Date/1000;
 		var angle = new Date/1200%(2*Math.PI), lantern_scale = getLanternScale(), lantern_translation = getLanternTranslation(), cube_scale = getCubeScale(), cube_translation = getCubeTranslation();
 		var i, angle_list = [], scale_list = [], translation_list = [];
+		framerate.textContent = 'frame rate: ' + (1/(now - last_frame)).toFixed(2);
+		last_frame = now;
 		for (i = 0; i < cube_vertices_count; ++i) {
 			angle_list.push(angle);
 			scale_list.push(cube_scale);
