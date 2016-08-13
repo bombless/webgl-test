@@ -5,6 +5,16 @@
 		gl.compileShader(shader);
 		return shader;
 	}
+	
+	function getSelection(val) {
+		return Math.floor(val * 100 % 10);
+	}
+
+	function setSelection(val, n) {
+		var o = getSelection(val);
+		var diff = n - o;
+		return val + diff * .01;
+	}
 
 	function createProgram(vs, fs) {
 		var program = gl.createProgram();
@@ -29,7 +39,7 @@
       var idx = Math.floor(factor * 3);
       var color = colors[idx];
       [].push.apply(rs, color);
-      rs.push(Math.sqrt(Math.sqrt(Math.sin(lat))));
+      rs.push(setSelection(.5 + .49 * Math.sqrt(Math.sqrt(Math.sin(lat))), 2));
     }
     function put(lat, lng) {
       rs.push(Math.sin(lng)*Math.sin(lat));
@@ -91,7 +101,7 @@
 					for (j = 0; j < vertices_tpl.length; ++j) {
 						[].push.apply(output, genCoverTile(vertices_tpl[vertices_tpl.length - j - 1] + Math.PI / 4, diff[i]));
 						[].push.apply(output, colors[i]);
-						output.push(1);
+						output.push(setSelection(.999, 5));
 					}
 				}
 				return output;
@@ -102,7 +112,7 @@
 				var output = [];
 				for (i = 0; i < vertices_tpl.length; ++i) {
 					[].push.apply(output, genTopTile(vertices_tpl[i] + Math.PI / 4));
-					output.push(0, 0, 0, 1);
+					output.push(0, 0, 0, setSelection(.999, 5));
 				}
 				return output;
 			}
@@ -112,7 +122,7 @@
 				var output = [];
 				for (i = vertices_tpl.length - 1; i >= 0; --i) {
 					[].push.apply(output, genBottomTile(vertices_tpl[i] + Math.PI / 4));
-					output.push(1, 1, 0, 1);
+					output.push(1, 1, 0, setSelection(.999, 5));
 				}
 				return output;
 			}
@@ -171,7 +181,7 @@
 		addEventListener('keyup', function() {
 			var x = translation[0];
 			var y = translation[1];
-			if (selection != 1) return;
+			if (selection != 2) return;
 			if (event.keyCode == A) {
 				last_time = Date.now();
 				b = [x, y];
@@ -200,7 +210,7 @@
 		var MINUS = 109, PLUS = 107;
 		
 		addEventListener('keyup', function() {
-			if (selection != 1) return;
+			if (selection != 2) return;
 			if (event.keyCode == PLUS) {
 				scale /= .99;
 			} else if (event.keyCode == MINUS) {
@@ -233,7 +243,7 @@
 		addEventListener('keyup', function() {
 			var x = translation[0];
 			var y = translation[1];
-			if (selection != 2) return;
+			if (selection != 5) return;
 			if (event.keyCode == A) {
 				last_time = Date.now();
 				b = [x, y];
@@ -262,7 +272,7 @@
 		var MINUS = 109, PLUS = 107;
 		
 		addEventListener('keyup', function() {
-			if (selection != 2) return;
+			if (selection != 5) return;
 			if (event.keyCode == PLUS) {
 				scale /= .99;
 			} else if (event.keyCode == MINUS) {
@@ -277,6 +287,7 @@
 	var div = document.createElement('div');
 	var cube_vertices = getCubeVertexList();
 	var lantern_vertices = createLantern(.1, .1, 2 * Math.PI);
+	console.log(lantern_vertices[6], cube_vertices[6])
 	var cube_vertices_count = cube_vertices.length / 7;
 	var lantern_vertices_count = lantern_vertices.length / 7;
 	var vertices_count = cube_vertices_count + lantern_vertices_count;
@@ -288,20 +299,26 @@
 	var canvas = div.querySelector('canvas');
 	var panel = div.querySelector('div');
 	var framerate = div.querySelector('p');
-	canvas.addEventListener('click', function(ev) {
-		ev.preventDefault();
-		selection = 1;
-		panel.textContent = 'lantern selected, use W,A,D,S to move around';
-		return false;
-	});
-	canvas.addEventListener('contextmenu', function(ev) {
-		ev.preventDefault();
-		selection = 2;
-		panel.textContent = 'cube selected, use W,A,D,S to move around';
-		return false;
-	});
-	var gl = canvas.getContext('webgl');
-
+	var gl = canvas.getContext('webgl', {preserveDrawingBuffer: true});
+	canvas.addEventListener('mousedown', function(ev) {
+    var x = ev.clientX, y = ev.clientY;
+    var rect = ev.target.getBoundingClientRect();
+    if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+      var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
+      var pixels = new Uint8Array(4);
+      gl.readPixels(x_in_canvas, y_in_canvas, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels); console.log(pixels, pixels[3]/256);
+      var n = getSelection(pixels[3]/256);
+			if (n > 0 && n < 3) {
+				selection = 2;
+				panel.textContent = 'lantern selected';
+			} else if (n > 3 && n < 6) {
+				selection = 5;
+				panel.textContent = 'cube selected';
+			} else {
+				panel.textContent = 'nothing selected';
+			}
+    }
+  });
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
@@ -325,7 +342,7 @@
 		gl_Position = vec4(new_x + translation.x, new_y + translation.y, new_z, 1.);
 		color_ = color;
 	}`;
-	var fs = 'precision mediump float;varying vec4 color_;' + 'void main() { gl_FragColor = color_; }';
+	var fs = 'precision highp float;varying vec4 color_;' + 'void main() { gl_FragColor = color_; }';
 
 	var program = createProgram(vs, fs);
 	gl.useProgram(program);
@@ -347,14 +364,14 @@
 	gl.vertexAttribPointer(scale, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + lantern_vertices.length * 4 + vertices_count * 4);
 	gl.enableVertexAttribArray(translation);
 	gl.vertexAttribPointer(translation, 2, gl.FLOAT, false, 0, cube_vertices.length * 4 +lantern_vertices.length * 4 + vertices_count * 8);
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
 	gl.cullFace(gl.BACK);
 
 	var last_frame = new Date/1000;
-	
-	+function step() {
+	gl.clearColor(1, 1, 1, 1);
+
+  +function step() {
+    gl.clear(gl.COLOR_BUFFER_BIT);
 		var now = new Date/1000;
 		var angle = new Date/1200%(2*Math.PI), lantern_scale = getLanternScale(), lantern_translation = getLanternTranslation(), cube_scale = getCubeScale(), cube_translation = getCubeTranslation();
 		var i, angle_list = [], scale_list = [], translation_list = [];
