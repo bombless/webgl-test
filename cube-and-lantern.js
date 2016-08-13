@@ -17,7 +17,59 @@
 		return program;
 	}
 
-	var getVertexList = (function() {
+
+  function createLantern(lat, lng, span) {
+    var lat_count = Math.PI / lat;
+    var lng_count = span / lng;
+    var i, j;
+    var rs = [];
+    var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+    function put_color(lng, lat) {
+      var factor = lng / Math.PI * 2 % 1;
+      var idx = Math.floor(factor * 3);
+      var color = colors[idx];
+      [].push.apply(rs, color);
+      rs.push(Math.sqrt(Math.sqrt(Math.sin(lat))));
+    }
+    function put(lat, lng) {
+      rs.push(Math.sin(lng)*Math.sin(lat));
+      rs.push(Math.cos(lat));
+      rs.push(Math.sin(lat)*Math.cos(lng));
+    }
+    for (i = 0; i < lat_count; ++i) {
+      for (j = 0; j < lng_count; ++j) {
+        put(lat * i, lng * j);
+
+        put_color(lng * j, lat * i);
+
+        put(lat*(i + 1), lng * j);
+
+        put_color(lng * j, lat * i);
+
+        put(lat*(i + 1), lng*(j + 1));
+
+        put_color(lng * j, lat * i);
+
+
+
+        put(lat * i, lng * j);
+
+        put_color(lng * j, lat * i);
+
+        put(lat*(i + 1), lng*(j + 1));
+
+        put_color(lng * j, lat * i);
+
+        put(lat * i, lng*(j + 1));
+
+        put_color(lng * j, lat*i);
+      }
+    }
+    return rs;
+  }
+
+
+	var getCubeVertexList = (function() {
 		var vertices_tpl = [0, Math.PI / 2, Math.PI, Math.PI, 3 * Math.PI / 2, 0];
 		var NUM = 4;
 		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]];
@@ -144,7 +196,7 @@
 	})();
 
 	var getLanternScale = (function() {
-		var scale = 1;
+		var scale = .3;
 		var MINUS = 109, PLUS = 107;
 		
 		addEventListener('keyup', function() {
@@ -161,7 +213,7 @@
 	})();
 
 	var getCubeTranslation = (function() {
-		var translation = [-.6, 0];
+		var translation = [.6, 0];
 		var A = 65, D = 68, W = 87, S = 83;
 		var last_time, c, b;
 		setTimeout(function step() {
@@ -206,7 +258,7 @@
 	})();
 
 	var getCubeScale = (function() {
-		var scale = 1;
+		var scale = .3;
 		var MINUS = 109, PLUS = 107;
 		
 		addEventListener('keyup', function() {
@@ -223,8 +275,11 @@
 	})();
 
 	var div = document.createElement('div');
-	var cube_vertices = getVertexList();
-	var vertices_count = cube_vertices.length / 7;
+	var cube_vertices = getCubeVertexList();
+	var lantern_vertices = createLantern(.1, .1, 2 * Math.PI);
+	var cube_vertices_count = cube_vertices.length / 7;
+	var lantern_vertices_count = lantern_vertices.length / 7;
+	var vertices_count = cube_vertices_count + lantern_vertices_count;
 	div.innerHTML = '<canvas width=300 height=300></canvas>' +
 		'<div></div>';
 	document.addEventListener('DOMContentLoaded', function() {
@@ -232,6 +287,12 @@
 	});
 	var canvas = div.querySelector('canvas');
 	var panel = div.querySelector('div');
+	canvas.addEventListener('click', function(ev) {
+		ev.preventDefault();
+		selection = 1;
+		panel.textContent = 'lantern selected, use W,A,D,S to move around';
+		return false;
+	});
 	canvas.addEventListener('contextmenu', function(ev) {
 		ev.preventDefault();
 		selection = 2;
@@ -243,8 +304,9 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + 16 * vertices_count, gl.DYNAMIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + lantern_vertices.length * 4 + 16 * vertices_count, gl.DYNAMIC_DRAW);
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(cube_vertices), gl.DYNAMIC_DRAW);
+	gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4, new Float32Array(lantern_vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute vec3 data;attribute vec4 color;attribute float angle;attribute float scale;attribute vec2 translation;uniform float rotate;varying vec4 color_;' +
 	`void main() {
@@ -279,27 +341,32 @@
 	gl.enableVertexAttribArray(color);
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 4 * (3 + 4), 12);
 	gl.enableVertexAttribArray(angle);
-	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 0, cube_vertices.length * 4);
+	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + lantern_vertices.length * 4);
 	gl.enableVertexAttribArray(scale);
-	gl.vertexAttribPointer(scale, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 4);
+	gl.vertexAttribPointer(scale, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + lantern_vertices.length * 4 + vertices_count * 4);
 	gl.enableVertexAttribArray(translation);
-	gl.vertexAttribPointer(translation, 2, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 8);
+	gl.vertexAttribPointer(translation, 2, gl.FLOAT, false, 0, cube_vertices.length * 4 +lantern_vertices.length * 4 + vertices_count * 8);
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
 	gl.cullFace(gl.BACK);
 	
 	+function step() {
-		var angle = new Date/1200%(2*Math.PI), cube_scale = getCubeScale(), cube_translation = getCubeTranslation();
+		var angle = new Date/1200%(2*Math.PI), lantern_scale = getLanternScale(), lantern_translation = getLanternTranslation(), cube_scale = getCubeScale(), cube_translation = getCubeTranslation();
 		var i, angle_list = [], scale_list = [], translation_list = [];
-		for (i = 0; i < vertices_count; ++i) {
+		for (i = 0; i < cube_vertices_count; ++i) {
 			angle_list.push(angle);
 			scale_list.push(cube_scale);
 			[].push.apply(translation_list, cube_translation);
 		}
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4, new Float32Array(angle_list), gl.DYNAMIC_DRAW);
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4, new Float32Array(scale_list), gl.DYNAMIC_DRAW);
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4 + scale_list.length * 4, new Float32Array(translation_list), gl.DYNAMIC_DRAW);
+		for (i = 0; i < lantern_vertices_count; ++i) {
+			angle_list.push(angle);
+			scale_list.push(lantern_scale);
+			[].push.apply(translation_list, lantern_translation);
+		}
+		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + lantern_vertices.length * 4, new Float32Array(angle_list), gl.DYNAMIC_DRAW);
+		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + lantern_vertices.length * 4 + angle_list.length * 4, new Float32Array(scale_list), gl.DYNAMIC_DRAW);
+		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + lantern_vertices.length * 4 + angle_list.length * 4 + scale_list.length * 4, new Float32Array(translation_list), gl.DYNAMIC_DRAW);
 		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
 		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
 		requestAnimationFrame(step);
