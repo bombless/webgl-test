@@ -18,18 +18,29 @@
 	}
 
 	var div = document.createElement('div');
-	div.innerHTML = '<canvas width=300 height=300></canvas>';
+	div.innerHTML = '<canvas width=300 height=300></canvas>' +
+		'<div style="height:10px; background-color:rgb(0,0,0)"></div>';
 	document.addEventListener('DOMContentLoaded', function() {
 		document.body.appendChild(div);
 	});
 	var canvas = div.querySelector('canvas');
-	var gl = canvas.getContext('webgl');
+	var panel = div.querySelector('div');
+	var gl = canvas.getContext('webgl', {preserveDrawingBuffer: true});
+	canvas.addEventListener('mousedown', function(ev) {
+		var x = ev.clientX, y = ev.clientY;
+		var rect = ev.target.getBoundingClientRect();
+		if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+			var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
+			var pixels = new Uint8Array(4);
+			gl.readPixels(x_in_canvas, y_in_canvas, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+			panel.style.backgroundColor = 'rgb(' + pixels[0] + ',' + pixels[1] + ',' + pixels[2] + ')';
+		}
+	});
 
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
 	var vertices = [Math.PI / 4, 3 * Math.PI / 4, 5 * Math.PI / 4, 5 * Math.PI / 4, 7 * Math.PI / 4, Math.PI / 4];
-	console.log(vertices);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
 	var vs = 'attribute float pos;uniform float rotate;varying float vPos;' +
@@ -70,8 +81,10 @@
 	var rotate = gl.getUniformLocation(program, 'rotate');
 	gl.enableVertexAttribArray(pos);
 	gl.vertexAttribPointer(pos, 1, gl.FLOAT, false, 0, 0);
+	gl.clearColor(1, 1, 1, 1);
 
 	+function step() {
+		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
 		requestAnimationFrame(step);
