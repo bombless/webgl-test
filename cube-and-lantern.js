@@ -99,7 +99,7 @@
 	var selection = 0;
 
 	var getCubeTranslation = (function() {
-		var translation = [0, 0];
+		var translation = [-.6, 0];
 		var A = 65, D = 68, W = 87, S = 83;
 		var last_time, c, b;
 		setTimeout(function step() {
@@ -119,7 +119,7 @@
 		addEventListener('keyup', function() {
 			var x = translation[0];
 			var y = translation[1];
-			if (selection != 1) return;
+			if (selection != 2) return;
 			if (event.keyCode == A) {
 				last_time = Date.now();
 				b = [x, y];
@@ -143,13 +143,12 @@
 		};
 	})();
 
-
 	var getCubeScale = (function() {
 		var scale = 1;
 		var MINUS = 109, PLUS = 107;
 		
 		addEventListener('keyup', function() {
-			if (selection != 1) return;
+			if (selection != 2) return;
 			if (event.keyCode == PLUS) {
 				scale /= .99;
 			} else if (event.keyCode == MINUS) {
@@ -164,11 +163,19 @@
 	var div = document.createElement('div');
 	var cube_vertices = getVertexList();
 	var vertices_count = cube_vertices.length / 7;
-	div.innerHTML = '<canvas width=300 height=300></canvas>';
+	div.innerHTML = '<canvas width=300 height=300></canvas>' +
+		'<div></div>';
 	document.addEventListener('DOMContentLoaded', function() {
 		document.body.appendChild(div);
 	});
 	var canvas = div.querySelector('canvas');
+	var panel = div.querySelector('div');
+	canvas.addEventListener('contextmenu', function(ev) {
+		ev.preventDefault();
+		selection = 2;
+		panel.textContent = 'cube selected, use W,A,D,S to move around';
+		return false;
+	});
 	var gl = canvas.getContext('webgl');
 
 	var buf = gl.createBuffer();
