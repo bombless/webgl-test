@@ -55,8 +55,8 @@
 			}
 			put.idx = (idx + 1) % 3;
 		}
-		for (i = 0; i < lat_count; ++i) {
-			for (j = 0; j < lng_count; ++j) {
+		for (j = 0; j < lng_count; ++j) {
+			for (i = 0; i < lat_count; ++i) {
 				put(lat * i, lng * j);
 				put(lat * (i + 1), lng * j);
 				put(lat * (i + 1), lng * (j + 1));
@@ -75,7 +75,7 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	var vertices = createFlag(.1, .01, 10);
+	var vertices = createFlag(.1, .01, 24);
 	console.log(vertices.length);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
@@ -83,6 +83,7 @@
 	attribute vec3 pos;
 	attribute vec4 color;
 	uniform float scale;
+	uniform float move;
 	uniform float rotate;
 	varying vec4 color_;
 	void main() {
@@ -92,7 +93,7 @@
 			vec3(0, sin(rotate), cos(rotate))
 		);
 
-		vec3 o = scale * v_rotate * pos;
+		vec3 o = scale * v_rotate * (pos + vec3(-move, 0, 0));
 
 		gl_Position = vec4(o.xy, 0, o.z * .3 + .5);
 		color_ = color;
@@ -106,6 +107,7 @@
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
+	var move = gl.getUniformLocation(program, 'move');
 	var scale = gl.getUniformLocation(program, 'scale');
 	var rotate = gl.getUniformLocation(program, 'rotate');
 	gl.enableVertexAttribArray(pos);
@@ -114,13 +116,17 @@
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 7 * 4, 3 * 4);
 
 	+function step() {
-		vertices = createFlag(.1, .01, 10);
-		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-		//gl.uniform1f(scale, .2 + Math.abs(new Date/10000%.2));
-		gl.uniform1f(scale, .1);
-		gl.uniform1f(rotate, new Date/10000%(2*Math.PI));
+		var triangle_count = vertices.length / 7 / 3;
+		var min = Math.floor(new Date / 1000 % 1 * .3 * triangle_count) * 3;
+		//vertices = createFlag(.1, .01, 10);
+		//gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+		gl.uniform1f(scale, .26 + Math.abs(new Date/10000%.1));
+		//gl.uniform1f(scale, .1);
+		gl.uniform1f(move, vertices[min * 7] + .5);
+		gl.uniform1f(rotate,  .3 + Math.abs(new Date/16000%.1));
 		//gl.uniform1f(rotate, .9);
-		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 7);
+		//gl.drawArrays(gl.TRIANGLES, 0, triangle_count * 3);
+		gl.drawArrays(gl.TRIANGLES, min, Math.floor(triangle_count *.7) * 3);
 		requestAnimationFrame(step);
 	}()
 }()
