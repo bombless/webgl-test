@@ -22,67 +22,36 @@
 	}
 
 	function createF(n) {
-		var rs = [
-            -.75, -.75, -.25,
-            -.75, .75, -.25,
-            -.25, -.75, -.25,
-            -.25, -.75, -.25,
-            -.75, .75, -.25,
-            -.25, .75, -.25,
+		var data = {
+			'1': [-.5, .75],
+			'3': [-.25, .75],
+			'5': [.5, .75],
+			'7': [.5, .5],
+			'9': [.5, .25],
+			'11': [.5, 0],
+			'13': [-.25, .5],
+			'15': [-.25, .25],
+			'17': [-.25, 0],
+			'19': [-.5, -.5],
+			'21': [-.25, -.5]
+		};
+		function getData(n) {
+			n = parseInt(n);
+			if (n % 2) {
+				return [data[n][0], data[n][1], -.25];
+			}
+			return [data[n - 1][0], data[n - 1][1], .25];
+		}
+		var raw = `
+		2 4 22, 2 22 20, 2 20 19, 2 19 1, 3 1 19, 3 19 21, 20 22 21, 20 21 19, 13 15 16, 13 16 14, 17 21 22, 17 22 18, 1 5 6, 1 6 2, 4 6 8, 4 8 14, 14 8 7, 14 7 13, 7 5 3, 7 3 13, 5 7 8, 5 8 6, 15 9 10, 15 10 16, 16 10 12, 16 12 18, 18 12 11, 18 11 17, 11 9 15, 11 15 17, 10 9 11, 10 11 12
+		`;
 
+		// raw = '15 9 10, 15 10 16, 16 10 12, 16 12 18, 18 12 11, 18 11 17, 11 9 15, 11 15 17, 10 9 11, 10 11 12';
 
-            -.25, .75, -.25,
-            .75, .75, -.25,
-            -.25, .5, -.25,
-            -.25, .5, -.25,
-            .75, .75, -.25,
-            .75, .5, -.25,
-
-
-            -.25, .25, -.25,
-            .5, .25, -.25,
-            -.25, 0, -.25,
-            -.25, 0, -.25,
-            .5, .25, -.25,
-            .5, 0, -.25,
-
-
-            -.25, 0, -.25,
-            .5, 0, -.25,
-            -.25, 0, .25,
-            -.25, 0, .25,
-            .5, 0, -.25,
-            .5, 0, .25,
-
-
-            -.75, -.75, -.25,
-            -.25, -.75, -.25,
-            -.75, -.75, .25,
-            -.75, -.75, .25,
-            -.25, -.75, -.25,
-            -.25, -.75, .25,
-
-            
-            -.75, -.75, .25,
-            -.25, -.75, .25,
-            -.75, .75, .25,
-            -.25, -.75, .25,
-            -.25, .75, .25,
-            -.75, .75, .25,
-
-            
-            -.75, .75, -.25,
-            -.75, .75, .25,
-            .75, .75, -.25,
-            .75, .75, -.25,
-            -.75, .75, .25,
-            .75, .75, .25,
-
-            
-            -.75, .75, -.25,
-            -.75, -.75, -.25,
-            -.75, -.75, .25,
-        ];
+		var rs = [];
+		raw.split(',').forEach(val => {
+			val.trim().split(' ').forEach(val => [].push.apply(rs, getData(val)));
+		});
         var i, len = rs.length, colors = [];
         console.log(rs);
         for (i = 0; i < len; ++i) {
@@ -100,6 +69,7 @@
 
 	var cnt = 0;    
 	var vertices = createF();
+	console.log(vertices);
 	function createCanvas() {
 		var div = document.createElement('div');
 		div.innerHTML = '<canvas width=300 height=300></canvas><button>click</button>';
@@ -151,6 +121,7 @@
 
 	gl.enable(gl.BLEND);
 	gl.enable(gl.CULL_FACE);
+	// gl.disable(gl.CULL_FACE);
 	gl.cullFace(gl.FRONT);
 	
 	gl.enableVertexAttribArray(pos);
@@ -163,10 +134,10 @@
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	
 	+function step() {
-		//var val_angle = new Date/1000%(2*Math.PI);
+		var val_angle = new Date/1000%(2*Math.PI);
 		//var val_rotate = new Date/1200%(2*Math.PI);
-		var val_angle = .5;
-		var val_rotate = 0;
+		// var val_angle = 0;
+		var val_rotate = Math.PI;
 		gl.uniform1f(angle, val_angle);
 		gl.uniform1f(rotate, val_rotate);
 		document.title = val_angle + ',' + val_rotate;
