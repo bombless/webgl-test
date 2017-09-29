@@ -10,12 +10,15 @@
 		var program = gl.createProgram();
 		var vshader = createShader(vs, gl.VERTEX_SHADER);
 		var fshader = createShader(fs, gl.FRAGMENT_SHADER);
+
+		console.log(gl.getShaderInfoLog(vshader));
 		
 		gl.attachShader(program, vshader);
 		gl.attachShader(program, fshader);
 		gl.linkProgram(program);
 		program.use = function() {
 			gl.useProgram(program);
+			console.log(gl.getError())
 			return program;
 		};
 		return program;
@@ -50,12 +53,25 @@
 
 		var rs = [];
 		raw.split(',').forEach(val => {
-			val.trim().split(' ').forEach(val => [].push.apply(rs, getData(val)));
+			var arr = [];
+			var avg_x = 0, avg_y = 0;
+			var i;
+			val.trim().split(' ').forEach(val => [].push.apply(arr, getData(val)));
+			for (i = 0; i < arr.length; i += 3) {
+				avg_x += arr[i] / (arr.length / 3);
+				avg_y += arr[i + 1] / (arr.length / 3);
+			}
+			for (i = 0; i < arr.length; i += 3) {
+				arr[i] += (avg_x - arr[i]) / 10000;
+				arr[i + 1] += (avg_y - arr[i + 1]) / 10000;
+			}
+			[].push.apply(rs, arr);
 		});
-        var i, len = rs.length, colors = [];
+        var i, j, len = rs.length, colors = [], rng;
         console.log(rs);
         for (i = 0; i < len; ++i) {
-            colors.push(Math.random());
+					rng = Math.random() * .5 + .2;
+					colors.push(rng);
         }
         colors.sort();
         if (n != null) {
@@ -65,7 +81,7 @@
         }
         [].push.apply(rs, colors);
         return rs;
-	}
+			}
 
 	var cnt = 0;    
 	var vertices = createF();
@@ -86,26 +102,37 @@
 	}
 
 	var canvas = createCanvas();
-	var gl = canvas.getContext('webgl', {
-		'premultipliedAlpha': false
-	});
+	var gl = canvas.getContext('webgl');
 
-	var vs = 'attribute vec3 pos, color;uniform float angle, rotate;varying vec4 color_;' +
-	`void main() {
-		vec3 pos_ = pos * .2;
-		float x = pos_.x;
-		float y = pos_.y;
-		float z = pos_.z;
-		float new_y = y * cos(angle) - z * sin(angle);
-		float new_x = x;
-		float new_z = y * sin(angle) + z * cos(angle);
+	var vs = 'attribute vec3 pos, color;uniform float angleX, angleY, angleZ;varying vec4 color_;' +
+	`
+	vec3 rotateX(vec3 pos, float angle) {
+		float c = cos(angle);
+		float s = sin(angle);
+		float newY = pos.y * c + pos.z * s;
+		float newZ = pos.y * (-s) + pos.z * c;
+		return vec3(pos.x, newY, newZ);
+	}
+	vec3 rotateY(vec3 pos, float angle) {
+		float c = cos(angle);
+		float s = sin(angle);
+		float newX = pos.x * c + pos.z * s;
+		float newZ = pos.x * (-s) + pos.z * c;
+		return vec3(newX, pos.y, newZ);
+	}
+	vec3 rotateZ(vec3 pos, float angle) {
+		float c = cos(angle);
+		float s = sin(angle);
+		float newX = pos.x * c + pos.y * s;
+		float newY = pos.x * (-s) + pos.y * c;
+		return vec3(newX, newY, pos.z);
+	}
+	void main() {
+		vec3 pos_ = rotateX(rotateY(rotateZ(pos * .2, angleZ), angleY), angleX);
+		
+		float newZ = pos_.z * .5 + .5;
 
-		new_x = new_x * cos(rotate) - new_y * sin(rotate);
-		new_y = new_x * sin(rotate) + new_y * cos(rotate);
-
-		new_z = new_z * .5 + .5;
-
-		gl_Position = vec4(new_x, new_y, 0., new_z);
+		gl_Position = vec4(pos_.x, pos_.y, 0., newZ);
 		color_ = vec4(color, 1.);
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' +
@@ -116,13 +143,16 @@
 
 	var pos = gl.getAttribLocation(program, 'pos');
 	var color = gl.getAttribLocation(program, 'color');
-	var angle = gl.getUniformLocation(program, 'angle');
-	var rotate = gl.getUniformLocation(program, 'rotate');
+	var angleX = gl.getUniformLocation(program, 'angleX');
+	var angleY = gl.getUniformLocation(program, 'angleY');
+	var angleZ = gl.getUniformLocation(program, 'angleZ');
 
 	gl.enable(gl.BLEND);
 	gl.enable(gl.CULL_FACE);
 	// gl.disable(gl.CULL_FACE);
-	gl.cullFace(gl.FRONT);
+	gl.disable(gl.BLEND);
+	gl.cullFace(gl.BACK);
+	gl.enable(gl.DEPTH_TEST);
 	
 	gl.enableVertexAttribArray(pos);
 	gl.enableVertexAttribArray(color);
@@ -134,13 +164,16 @@
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	
 	+function step() {
-		var val_angle = new Date/1000%(2*Math.PI);
-		//var val_rotate = new Date/1200%(2*Math.PI);
-		// var val_angle = 0;
-		var val_rotate = Math.PI;
-		gl.uniform1f(angle, val_angle);
-		gl.uniform1f(rotate, val_rotate);
-		document.title = val_angle + ',' + val_rotate;
+		var input_angleX = document.getElementById('angleX')
+		var val_angleX = parseInt(input_angleX? input_angleX.value: 0) / 360 * 2 * Math.PI;
+		var input_angleY = document.getElementById('angleY')
+		var val_angleY = parseInt(input_angleY? input_angleY.value: 0) / 360 * 2 * Math.PI;
+		var input_angleZ = document.getElementById('angleZ')
+		var val_angleZ = parseInt(input_angleZ? input_angleZ.value: 0) / 360 * 2 * Math.PI;
+		gl.uniform1f(angleX, val_angleX);
+		gl.uniform1f(angleY, val_angleY);
+		gl.uniform1f(angleZ, val_angleZ);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		requestAnimationFrame(step);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 6);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.STATIC_DRAW);

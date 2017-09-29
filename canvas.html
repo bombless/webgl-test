@@ -15,3 +15,17 @@ See <a href="https://github.com/bombless/webgl-test">Github</a>
 <script src="rotate-lantern.js"></script>
 <script src="broken-lantern.js"></script>-->
 
+<div><input id="angleX" type="range" min="0" max="360" value="0"><label for="angleX">0</label></div>
+<div><input id="angleY" type="range" min="0" max="360" value="0"><label for="angleY">0</label></div>
+<div><input id="angleZ" type="range" min="0" max="360" value="0"><label for="angleZ">0</label></div>
+<script>
+  document.getElementById('angleX').addEventListener('input', function() {
+    document.querySelector('[for="angleX"]').textContent = this.value;
+  });
+  document.getElementById('angleY').addEventListener('input', function() {
+    document.querySelector('[for="angleY"]').textContent = this.value;
+  });
+  document.getElementById('angleZ').addEventListener('input', function() {
+    document.querySelector('[for="angleZ"]').textContent = this.value;
+  });
+</script>
