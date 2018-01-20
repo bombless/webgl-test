@@ -88,11 +88,11 @@
 		div.innerHTML = '<canvas width=300 height=300></canvas><button>click</button>';
 		document.addEventListener('DOMContentLoaded', function() {
 			document.body.appendChild(div);
-            div.querySelector('button').addEventListener('click', function() {
-                this.textContent = cnt;
-                vertices = createF(cnt);
-                cnt += 1;
-            });
+      div.querySelector('button').addEventListener('click', function() {
+        this.textContent = cnt;
+        vertices = createF(cnt);
+        cnt += 1;
+      });
 		});
 
 		return div.querySelector('canvas');
