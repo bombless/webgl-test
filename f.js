@@ -157,11 +157,11 @@
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	
 	+function step() {
-		var input_angleX = document.getElementById('angleX')
+		var input_angleX = document.getElementById('angleX');
 		var val_angleX = parseInt(input_angleX? input_angleX.value: 0) / 360 * 2 * Math.PI;
-		var input_angleY = document.getElementById('angleY')
+		var input_angleY = document.getElementById('angleY');
 		var val_angleY = parseInt(input_angleY? input_angleY.value: 0) / 360 * 2 * Math.PI;
-		var input_angleZ = document.getElementById('angleZ')
+		var input_angleZ = document.getElementById('angleZ');
 		var val_angleZ = parseInt(input_angleZ? input_angleZ.value: 0) / 360 * 2 * Math.PI;
 		gl.uniform1f(angleX, val_angleX);
 		gl.uniform1f(angleY, val_angleY);
@@ -170,6 +170,5 @@
 		requestAnimationFrame(step);
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 6);
 		gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(vertices), gl.STATIC_DRAW);
-	}()
-}()
-
+	}();
+}();
