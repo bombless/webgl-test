@@ -129,10 +129,7 @@
 	}
 	void main() {
 		vec3 pos_ = rotateX(rotateY(rotateZ(pos * .2, angleZ), angleY), angleX);
-		
-		float newZ = pos_.z * .5 + .5;
-
-		gl_Position = vec4(pos_.x, pos_.y, 0., newZ);
+		gl_Position = vec4(pos_, pos_.z * .5 + .5);
 		color_ = vec4(color, 1.);
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' +
