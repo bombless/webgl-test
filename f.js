@@ -49,8 +49,6 @@
 		2 4 22, 2 22 20, 2 20 19, 2 19 1, 3 1 19, 3 19 21, 20 22 21, 20 21 19, 13 15 16, 13 16 14, 17 21 22, 17 22 18, 1 5 6, 1 6 2, 4 6 8, 4 8 14, 14 8 7, 14 7 13, 7 5 3, 7 3 13, 5 7 8, 5 8 6, 15 9 10, 15 10 16, 16 10 12, 16 12 18, 18 12 11, 18 11 17, 11 9 15, 11 15 17, 10 9 11, 10 11 12
 		`;
 
-		// raw = '15 9 10, 15 10 16, 16 10 12, 16 12 18, 18 12 11, 18 11 17, 11 9 15, 11 15 17, 10 9 11, 10 11 12';
-
 		var rs = [];
 		raw.split(',').forEach(val => {
 			var arr = [];
@@ -67,21 +65,20 @@
 			}
 			[].push.apply(rs, arr);
 		});
-        var i, j, len = rs.length, colors = [], rng;
-        console.log(rs);
-        for (i = 0; i < len; ++i) {
-					rng = Math.random() * .5 + .2;
-					colors.push(rng);
-        }
-        colors.sort();
-        if (n != null) {
-            for (i = n * 6 * 3; i < (n + 1) * 6 * 3 && i < colors.length; i += 3) {
-                colors[i] = 1;
-            }
-        }
-        [].push.apply(rs, colors);
-        return rs;
-			}
+    var i, j, len = rs.length, colors = [], rng;
+    for (i = 0; i < len; ++i) {
+			rng = Math.random() * .5 + .2;
+			colors.push(rng);
+    }
+    colors.sort();
+    if (n != null) {
+      for (i = n * 6 * 3; i < (n + 1) * 6 * 3 && i < colors.length; i += 3) {
+        colors[i] = 1;
+      }
+    }
+    [].push.apply(rs, colors);
+    return rs;
+	}
 
 	var cnt = 0;    
 	var vertices = createF();
@@ -156,7 +153,6 @@
 	gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
 	gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, 0, 0);
 	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 4*vertices.length / 2);
-    console.log(4*vertices.length / 2, vertices.length / 6)
 
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	
