@@ -10,14 +10,16 @@ See <a href="https://github.com/bombless/webgl-test">Github</a>
 <script src="square.js"></script>
 <script src="colored-cube.js"></script>
 <script src="square-spin.js"></script>
-<script src="colored-square-spin.js"></script>-->
-<script src="f.js"></script><!--
+<script src="colored-square-spin.js"></script>
+<script src="f.js"></script>
 <script src="rotate-lantern.js"></script>
 <script src="broken-lantern.js"></script>-->
+<script src="mesh.js"></script>
 
-<div><input id="angleX" type="range" min="0" max="360" value="0"><label for="angleX">0</label></div>
-<div><input id="angleY" type="range" min="0" max="360" value="0"><label for="angleY">0</label></div>
-<div><input id="angleZ" type="range" min="0" max="360" value="0"><label for="angleZ">0</label></div>
+<div>&alpha;<input id="angleX" type="range" min="0" max="360" value="0"><label for="angleX">0</label></div>
+<div>&beta;<input id="angleY" type="range" min="0" max="360" value="0"><label for="angleY">0</label></div>
+<div>&gamma;<input id="angleZ" type="range" min="0" max="360" value="0"><label for="angleZ">0</label></div>
+<div>depth<input id="depth" type="range" min="0" max="1" step="0.1" value="0"><label for="depth">0</label></div>
 <script>
   document.getElementById('angleX').addEventListener('input', function() {
     document.querySelector('[for="angleX"]').textContent = this.value;
@@ -27,5 +29,8 @@ See <a href="https://github.com/bombless/webgl-test">Github</a>
   });
   document.getElementById('angleZ').addEventListener('input', function() {
     document.querySelector('[for="angleZ"]').textContent = this.value;
+  });
+  document.getElementById('depth').addEventListener('input', function() {
+    document.querySelector('[for="depth"]').textContent = this.value;
   });
 </script>
