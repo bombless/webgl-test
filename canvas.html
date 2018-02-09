@@ -20,17 +20,22 @@ See <a href="https://github.com/bombless/webgl-test">Github</a>
 <div>&beta;<input id="angleY" type="range" min="0" max="360" value="0"><label for="angleY">0</label></div>
 <div>&gamma;<input id="angleZ" type="range" min="0" max="360" value="0"><label for="angleZ">0</label></div>
 <div>depth<input id="depth" type="range" min="0" max="1" step="0.1" value="0"><label for="depth">0</label></div>
+<div>color range red from<input id="crrf" type="range" min="0" max="255" step="1" value="0"><label for="crrf">0</label></div>
+<div>color range red to<input id="crrt" type="range" min="0" max="255" step="1" value="255"><label for="crrt">255</label></div>
+<div>color range green from<input id="crgf" type="range" min="0" max="255" step="1" value="0"><label for="crgf">0</label></div>
+<div>color range green to<input id="crgt" type="range" min="0" max="255" step="1" value="255"><label for="crgt">255</label></div>
+<div>color range blue from<input id="crbf" type="range" min="0" max="255" step="1" value="0"><label for="crbf">0</label></div>
+<div>color range blue to<input id="crbt" type="range" min="0" max="255" step="1" value="255"><label for="crbt">255</label></div>
 <script>
-  document.getElementById('angleX').addEventListener('input', function() {
-    document.querySelector('[for="angleX"]').textContent = this.value;
-  });
-  document.getElementById('angleY').addEventListener('input', function() {
-    document.querySelector('[for="angleY"]').textContent = this.value;
-  });
-  document.getElementById('angleZ').addEventListener('input', function() {
-    document.querySelector('[for="angleZ"]').textContent = this.value;
-  });
-  document.getElementById('depth').addEventListener('input', function() {
-    document.querySelector('[for="depth"]').textContent = this.value;
-  });
+  !function() {
+    const inputs = ['angleX', 'angleY', 'angleZ', 'depth', 'crrf', 'crrt', 'crgf', 'crgt', 'crbf', 'crbt'];
+    for (var i = 0; i < inputs.length; ++i) {
+      !function(i) {
+        document.getElementById(inputs[i]).addEventListener('input', function() {
+          document.querySelector('[for="' + inputs[i] + '"]').textContent = this.value;
+        });
+      }(i);
+    }
+  }();
+  
 </script>
