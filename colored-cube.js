@@ -163,7 +163,7 @@
 	var getAngleZ = function() { return parseFloat(document.getElementById('angleZ').value || 0) / 360 * 2 * Math.PI; };
 
 	var div = document.createElement('div');
-	var cube_vertices = getVertexList();
+	var cube_vertices = getVertexList();console.log('###', cube_vertices.length / 7)
 	var vertices_count = cube_vertices.length / 7;
 	div.innerHTML = '<canvas width=300 height=300></canvas>';
 	document.addEventListener('DOMContentLoaded', function() {
@@ -181,11 +181,9 @@
 	var vs = 'attribute vec3 data;attribute vec4 color;uniform float angle, rotate, angleZ;uniform float scale;uniform vec2 translation;varying vec4 color_;' +
 	`	
 	vec3 rotateZ(vec3 pos, float angle) {
-		float c = cos(angle);
-		float s = sin(angle);
-		float newX = pos.x * c + pos.z * s;
-		float newZ = pos.x * (-s) + pos.z * c;
-		return vec3(newX, pos.y, newZ);
+		float new_x = pos.x * cos(angle) - pos.y * sin(angle);
+		float new_y = pos.x * sin(angle) + pos.y * cos(angle);
+		return vec3(new_x, new_y, pos.z);
 	}
 	void main() {
 		float x = data.x * scale;
