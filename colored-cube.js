@@ -169,10 +169,10 @@
 	var buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 
-	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + 16 * vertices_count, gl.DYNAMIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4, gl.DYNAMIC_DRAW);
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(cube_vertices), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 data;attribute vec4 color;attribute float angle;attribute float scale;attribute vec2 translation;uniform float rotate;varying vec4 color_;' +
+	var vs = 'attribute vec3 data;attribute vec4 color;uniform float angle;uniform float scale;uniform vec2 translation;uniform float rotate;varying vec4 color_;' +
 	`void main() {
 		float x = data.x * scale;
 		float y = data.y * scale;
@@ -195,38 +195,26 @@
 
 	var data = gl.getAttribLocation(program, 'data');
 	var color = gl.getAttribLocation(program, 'color');
-	var angle = gl.getAttribLocation(program, 'angle');
-	var scale = gl.getAttribLocation(program, 'scale');
-	var translation = gl.getAttribLocation(program, 'translation');
+	var angle = gl.getUniformLocation(program, 'angle');
+	var scale = gl.getUniformLocation(program, 'scale');
+	var translation = gl.getUniformLocation(program, 'translation');
 	var rotate = gl.getUniformLocation(program, 'rotate');
 
 	gl.enableVertexAttribArray(data);
 	gl.vertexAttribPointer(data, 3, gl.FLOAT, false, 4 * (3 + 4), 0);
 	gl.enableVertexAttribArray(color);
 	gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 4 * (3 + 4), 12);
-	gl.enableVertexAttribArray(angle);
-	gl.vertexAttribPointer(angle, 1, gl.FLOAT, false, 0, cube_vertices.length * 4);
-	gl.enableVertexAttribArray(scale);
-	gl.vertexAttribPointer(scale, 1, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 4);
-	gl.enableVertexAttribArray(translation);
-	gl.vertexAttribPointer(translation, 2, gl.FLOAT, false, 0, cube_vertices.length * 4 + vertices_count * 8);
+	
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LESS);
 	gl.enable(gl.CULL_FACE);
 	gl.cullFace(gl.BACK);
 	
 	+function step() {
-		var angle = new Date/1200%(2*Math.PI), scale = getScale(), translation = getTranslation();
-		var i, angle_list = [], scale_list = [], translation_list = [];
-		for (i = 0; i < vertices_count; ++i) {
-			angle_list.push(angle);
-			scale_list.push(scale);
-			[].push.apply(translation_list, translation);
-		}
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4, new Float32Array(angle_list), gl.DYNAMIC_DRAW);
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4, new Float32Array(scale_list), gl.DYNAMIC_DRAW);
-		gl.bufferSubData(gl.ARRAY_BUFFER, cube_vertices.length * 4 + angle_list.length * 4 + scale_list.length * 4, new Float32Array(translation_list), gl.DYNAMIC_DRAW);
 		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
+		gl.uniform1f(angle, new Date/1200%(2*Math.PI));
+		gl.uniform1f(scale, getScale());
+		gl.uniform2fv(translation, getTranslation());
 		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
 		requestAnimationFrame(step);
 	}()
