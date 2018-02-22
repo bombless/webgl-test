@@ -160,6 +160,8 @@
 
 	var getAngle = function() { return parseFloat(document.getElementById('angleY').value || 0) / 360 * 2 * Math.PI; };
 
+	var getAngleZ = function() { return parseFloat(document.getElementById('angleZ').value || 0) / 360 * 2 * Math.PI; };
+
 	var div = document.createElement('div');
 	var cube_vertices = getVertexList();
 	var vertices_count = cube_vertices.length / 7;
@@ -176,8 +178,16 @@
 	gl.bufferData(gl.ARRAY_BUFFER, cube_vertices.length * 4, gl.DYNAMIC_DRAW);
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(cube_vertices), gl.DYNAMIC_DRAW);
 
-	var vs = 'attribute vec3 data;attribute vec4 color;uniform float angle;uniform float scale;uniform vec2 translation;uniform float rotate;varying vec4 color_;' +
-	`void main() {
+	var vs = 'attribute vec3 data;attribute vec4 color;uniform float angle, rotate, angleZ;uniform float scale;uniform vec2 translation;varying vec4 color_;' +
+	`	
+	vec3 rotateZ(vec3 pos, float angle) {
+		float c = cos(angle);
+		float s = sin(angle);
+		float newX = pos.x * c + pos.z * s;
+		float newZ = pos.x * (-s) + pos.z * c;
+		return vec3(newX, pos.y, newZ);
+	}
+	void main() {
 		float x = data.x * scale;
 		float y = data.y * scale;
 		float z = data.z * scale;
@@ -189,7 +199,9 @@
 		new_x = new_x * cos(rotate) - new_z * sin(rotate);
 		new_z = new_x * sin(rotate) + new_z * cos(rotate);
 
-		gl_Position = vec4(new_x + translation.x, new_y + translation.y, new_z, 1.);
+		vec3 pos = rotateZ(vec3(new_x, new_y, new_z), angleZ);
+
+		gl_Position = vec4(pos.x + translation.x, pos.y + translation.y, pos.z, 1.);
 		color_ = color;
 	}`;
 	var fs = 'precision mediump float;varying vec4 color_;' + 'void main() { gl_FragColor = color_; }';
@@ -200,9 +212,10 @@
 	var data = gl.getAttribLocation(program, 'data');
 	var color = gl.getAttribLocation(program, 'color');
 	var angle = gl.getUniformLocation(program, 'angle');
+	var rotate = gl.getUniformLocation(program, 'rotate');
+	var angleZ = gl.getUniformLocation(program, 'angleZ');
 	var scale = gl.getUniformLocation(program, 'scale');
 	var translation = gl.getUniformLocation(program, 'translation');
-	var rotate = gl.getUniformLocation(program, 'rotate');
 
 	gl.enableVertexAttribArray(data);
 	gl.vertexAttribPointer(data, 3, gl.FLOAT, false, 4 * (3 + 4), 0);
@@ -217,6 +230,7 @@
 	+function step() {
 		gl.uniform1f(rotate, getRotate());
 		gl.uniform1f(angle, getAngle());
+		gl.uniform1f(angleZ, getAngleZ());
 		gl.uniform1f(scale, getScale());
 		gl.uniform2fv(translation, getTranslation());
 		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
