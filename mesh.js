@@ -47,7 +47,7 @@
   request.onload = function() {
     init(loadMeshData(this.responseText).vertices);
   }
-  request.open('get', 'cube.obj.txt', true);
+  request.open('get', 'teapot.obj.txt', true);
   request.send();
 
   const vec3 = { fromValues: (a, b, c) => [a, b, c] }
@@ -84,22 +84,22 @@
             var f3 = parts[3].split('/');
             Array.prototype.push.apply(
               vertices, positions[parseInt(f1[0]) - 1]
-            );
+            );/*
             Array.prototype.push.apply(
               vertices, normals[parseInt(f1[2]) - 1]
-            );
+            );*/
             Array.prototype.push.apply(
               vertices, positions[parseInt(f2[0]) - 1]
-            );
+            );/*
             Array.prototype.push.apply(
               vertices, normals[parseInt(f2[2]) - 1]
-            );
+            );*/
             Array.prototype.push.apply(
               vertices, positions[parseInt(f3[0]) - 1]
-            );
+            );/*
             Array.prototype.push.apply(
               vertices, normals[parseInt(f3[2]) - 1]
-            );
+            );*/
             break;
           }
         }
@@ -196,10 +196,10 @@
     var translationX = gl.getUniformLocation(program, 'translationX');
     var translationY = gl.getUniformLocation(program, 'translationY');
 
-    gl.enable(gl.BLEND);
+    // gl.enable(gl.BLEND);
     gl.enable(gl.CULL_FACE);
     // gl.disable(gl.CULL_FACE);
-    gl.disable(gl.BLEND);
+    // gl.disable(gl.BLEND);
     gl.cullFace(gl.BACK);
     gl.enable(gl.DEPTH_TEST);
     
