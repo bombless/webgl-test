@@ -156,6 +156,10 @@
 		};
 	})();
 
+	var getRotate = function() { return parseFloat(document.getElementById('angleX').value || 0) / 360 * 2 * Math.PI; };
+
+	var getAngle = function() { return parseFloat(document.getElementById('angleY').value || 0) / 360 * 2 * Math.PI; };
+
 	var div = document.createElement('div');
 	var cube_vertices = getVertexList();
 	var vertices_count = cube_vertices.length / 7;
@@ -211,8 +215,8 @@
 	gl.cullFace(gl.BACK);
 	
 	+function step() {
-		gl.uniform1f(rotate, new Date/1000%(2*Math.PI));
-		gl.uniform1f(angle, new Date/1200%(2*Math.PI));
+		gl.uniform1f(rotate, getRotate());
+		gl.uniform1f(angle, getAngle());
 		gl.uniform1f(scale, getScale());
 		gl.uniform2fv(translation, getTranslation());
 		gl.drawArrays(gl.TRIANGLES, 0, vertices_count);
