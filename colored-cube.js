@@ -20,7 +20,7 @@
 	var getVertexList = (function() {
 		var vertices_tpl = [0, Math.PI / 2, Math.PI, Math.PI, 3 * Math.PI / 2, 0];
 		var NUM = 4;
-		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 0]];
+		var colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 1, 1]];
 		return function() {
 			var output = [];
 			[].push.apply(output, genBottom());
@@ -50,7 +50,7 @@
 				var output = [];
 				for (i = 0; i < vertices_tpl.length; ++i) {
 					[].push.apply(output, genTopTile(vertices_tpl[i] + Math.PI / 4));
-					output.push(0, 0, 0, 1);
+					output.push(1, 0, 1, 1);
 				}
 				return output;
 			}
