@@ -2,6 +2,7 @@ class ObjMeshLoader {
   constructor(canvas, src) {
     this.gl = canvas.getContext('webgl');
     this.parseSource(src);
+    console.log(this)
   }
   perform() {
     let gl_loader = new ObjMeshGlLoader(this.gl);
@@ -48,7 +49,7 @@ class ObjMeshLoader {
     let normals = [];
     let textures = [];
 
-    src.split(/\s*\n/).forEach(line => {
+    src.split(/\s*\n/).forEach((line, idx) => {
       const components = line.split(/\s+/);
       switch (components[0]) {
         case 'v':
@@ -61,23 +62,24 @@ class ObjMeshLoader {
           textures.push([parseFloat(components[1]), parseFloat(components[2])]);
           break;
         case 'f':
+          console.log('line', idx, components.slice(1))
           components.slice(1).forEach(com => {
             let matches;
-            if (/\d+/.test(com)) {
+            if (/^\d+$/.test(com)) {
               const n = parseInt(com);
-              Array.prototype.push.apply(this.type1, positions[n]);
+              Array.prototype.push.apply(this.type1, positions[n - 1]);
             } else if (matches = com.match(/^(\d+)\/(\d+)$/)) {
-              Array.prototype.push.apply(this.type2, positions[parseInt(matches[1])]);
-              Array.prototype.push.apply(this.type2, textures[parseInt(matches[2])]);
+              Array.prototype.push.apply(this.type2, positions[parseInt(matches[1]) - 1]);
+              Array.prototype.push.apply(this.type2, textures[parseInt(matches[2]) - 1]);
             } else if (matches = com.match(/^(\d+)\/(\d+)\/(\d+)$/)) {
-              Array.prototype.push.apply(this.type3, positions[parseInt(matches[1])]);
-              Array.prototype.push.apply(this.type3, textures[parseInt(matches[2])]);
-              Array.prototype.push.apply(this.type3, normals[parseInt(matches[3])]);
+              Array.prototype.push.apply(this.type3, positions[parseInt(matches[1]) - 1]);
+              Array.prototype.push.apply(this.type3, textures[parseInt(matches[2]) - 1]);
+              Array.prototype.push.apply(this.type3, normals[parseInt(matches[3]) - 1]);
             } else if (matches = com.match(/^(\d+)\/\/(\d+)$/)) {
-              Array.prototype.push.apply(this.type4, positions[parseInt(matches[1])]);
-              Array.prototype.push.apply(this.type4, normals[parseInt(matches[2])]);
+              Array.prototype.push.apply(this.type4, positions[parseInt(matches[1]) - 1]);
+              Array.prototype.push.apply(this.type4, normals[parseInt(matches[2]) - 1]);
             }
-          })
+          });
       }
     });
   }

@@ -50,6 +50,9 @@ class ObjMeshGlProgram {
       float newY = pos.x * (-s) + pos.y * c;
       return vec3(newX, newY, pos.z);
     }
+    bool isnan(float val) {
+      return !(val <= 0.0 || 0.0 <= val);
+    }
     void main() {
       vec3 pos_ = rotateX(rotateY(rotateZ(vec3(posX, posY, posZ) * .2, angleZ), angleY), angleX);
       gl_Position = vec4(pos_ + vec3(translationX, translationY, 0.0), pos_.z * .5 + .5 + depth);

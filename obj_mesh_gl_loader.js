@@ -2,6 +2,7 @@ class ObjMeshGlLoader {
   constructor(gl) {
     this.gl = gl;
     this.programs = new ObjMeshGlProgram(gl);
+    this.debug = true;
   }
   getTypeNVerticesCount(n, count) {
     switch (n) {
@@ -77,6 +78,10 @@ class ObjMeshGlLoader {
         const r = gl.getAttribLocation(program, 'r');
         const g = gl.getAttribLocation(program, 'g');
         const b = gl.getAttribLocation(program, 'b');
+        
+        gl.enableVertexAttribArray(r);
+        gl.enableVertexAttribArray(g);
+        gl.enableVertexAttribArray(b);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this['type' + n + '_color_buffer']);
 
@@ -107,10 +112,17 @@ class ObjMeshGlLoader {
         Array.prototype.push.apply(color_buff, colors[1]);
         Array.prototype.push.apply(color_buff, colors[2]);
 
+        if (this.debug) {
+          console.log(values)
+          console.log(color_buff);
+          console.log(color_buffer_width / 4 / 3)
+        }
+
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(color_buff), gl.DYNAMIC_DRAW);
 
         gl.drawArrays(gl.TRIANGLES, 0, color_buffer_width / 4 / 3);
       }
     }
+    this.debug = false;
   }
 }
