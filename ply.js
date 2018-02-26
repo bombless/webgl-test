@@ -98,55 +98,38 @@ var LoadPLY = (function() {
             }
 
             // Wire face data to appropriate vertices
-            var n = e[0]; // unused, always 3; assumes triangulated models only
-            var a = e[1]; // face vertex A
-            var b = e[2]; // face vertex B
-            var c = e[3]; // face vertex C
+            var n = parseInt(e[0]);
 
             if (FaceIndex < PLY_Faces) {
               // We don't really have to *store* face data
               // faces[FaceIndex] = new PLY_Face(a, b, c);
 
               // vertices
-              arrayVertex.push(vertices[a].x);
-              arrayVertex.push(vertices[a].y);
-              arrayVertex.push(vertices[a].z);
-              arrayVertex.push(vertices[b].x);
-              arrayVertex.push(vertices[b].y);
-              arrayVertex.push(vertices[b].z);
-              arrayVertex.push(vertices[c].x);
-              arrayVertex.push(vertices[c].y);
-              arrayVertex.push(vertices[c].z);
+              for (var j = 0; j < n; j++) {
+                arrayVertex.push(vertices[e[j + 1]].x);
+                arrayVertex.push(vertices[e[j + 1]].y);
+                arrayVertex.push(vertices[e[j + 1]].z);
+              }
 
               // normals
-              arrayNormal.push(vertices[a].nx);
-              arrayNormal.push(vertices[a].ny);
-              arrayNormal.push(vertices[a].nz);
-              arrayNormal.push(vertices[b].nx);
-              arrayNormal.push(vertices[b].ny);
-              arrayNormal.push(vertices[b].nz);
-              arrayNormal.push(vertices[c].nx);
-              arrayNormal.push(vertices[c].ny);
-              arrayNormal.push(vertices[c].nz);
+              for (var j = 0; j < n; j++) {
+                arrayNormal.push(vertices[e[j + 1]].nx);
+                arrayNormal.push(vertices[e[j + 1]].ny);
+                arrayNormal.push(vertices[e[j + 1]].nz);
+              }
 
               // colors
-              arrayColor.push(vertices[a].r);
-              arrayColor.push(vertices[a].g);
-              arrayColor.push(vertices[a].b);
-              arrayColor.push(vertices[b].r);
-              arrayColor.push(vertices[b].g);
-              arrayColor.push(vertices[b].b);
-              arrayColor.push(vertices[c].r);
-              arrayColor.push(vertices[c].g);
-              arrayColor.push(vertices[c].b);
+              for (var j = 0; j < n; j++) {
+                arrayColor.push(vertices[e[j + 1]].r);
+                arrayColor.push(vertices[e[j + 1]].g);
+                arrayColor.push(vertices[e[j + 1]].b);
+              }
 
               // uv
-              arrayTexture.push(vertices[a].u);
-              arrayTexture.push(vertices[a].v);
-              arrayTexture.push(vertices[b].u);
-              arrayTexture.push(vertices[b].v);
-              arrayTexture.push(vertices[c].u);
-              arrayTexture.push(vertices[c].v);
+              for (var j = 0; j < n; j++) {
+                arrayTexture.push(vertices[e[j + 1]].u);
+                arrayTexture.push(vertices[e[j + 1]].v);
+              }
 
               // index
               arrayIndex.push(FaceIndex);
