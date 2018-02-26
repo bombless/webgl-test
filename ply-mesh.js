@@ -43,7 +43,7 @@
 		return div.querySelector('canvas');
   }
 
-  LoadPLY("teapot.ply.txt", data => {
+  LoadPLY("cube.ply", data => {
     console.log(data[0])
     init(data[0], data[3]);
   });

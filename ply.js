@@ -106,6 +106,15 @@ var LoadPLY = (function() {
 
               // vertices
               for (var j = 0; j < n; j++) {
+                if (j > 2) {
+                  arrayVertex.push(vertices[e[1]].x);
+                  arrayVertex.push(vertices[e[1]].y);
+                  arrayVertex.push(vertices[e[1]].z);
+
+                  arrayVertex.push(vertices[e[j]].x);
+                  arrayVertex.push(vertices[e[j]].y);
+                  arrayVertex.push(vertices[e[j]].z);
+                }
                 arrayVertex.push(vertices[e[j + 1]].x);
                 arrayVertex.push(vertices[e[j + 1]].y);
                 arrayVertex.push(vertices[e[j + 1]].z);
@@ -152,7 +161,7 @@ var LoadPLY = (function() {
         }
 
         // Finished reading header data, prepare for reading vertex data
-        if (lines[i] == "end_header") {
+        if (lines[i].substr(0, "end_header".length) == "end_header") {
           // Allocate enough space for vertices
           vertices = new Array(PLY_Vertices);
 
